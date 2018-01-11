@@ -7,6 +7,7 @@ class Rips_complex:
         :type points: list
         """
         self.splxs = []
+        self.points = points
         self.nbr_splxs = len(self.splxs)
         self.zero_splxs = np.array(points)
         self.one_splxs = np.array([])
@@ -22,7 +23,7 @@ class Rips_complex:
         self.holes_dates = []
         self.neighbours_matrix = np.array([])
         self.homology_matrix = np.array([])
-        self.pers_diag = self.persistant_homology
+        self.pers_diag = self.execute_homology
 
     def distance(self, a, b):
         """        
@@ -58,7 +59,7 @@ class Rips_complex:
                 dist_min = dist
         return dist_min
 
-    def construct_network(self, dist_max, step):
+    def construct_network(self):
         """
         construct the Ripps network for each distance r from 0 to dist_max with a given step
         :param dist_max: 
@@ -69,7 +70,7 @@ class Rips_complex:
         n = self.nbr_0_splxs
         for k in range(n):
             self.splxs.append((0, k))
-        while r <= dist_max:
+        while r <= self.D:
             # Create the 1_splxs
             for i in range(n):
                 for j in range(i + 1, n):
@@ -98,7 +99,7 @@ class Rips_complex:
                                         np.append(self.two_splxs, (i, j, k))
                                         self.splxs.append((2, self.nbr_2_splxs))
                                         self.birth_dates.append(r)
-                r += step
+                r += self.step
         return ()
 
     def construct_neighbours_matrix(self):
@@ -106,7 +107,7 @@ class Rips_complex:
         Constructs the neighbours matrix:
         neighbour_matrix[i,k] is equal to 1 iif the simplex indexed by k in
         the splxs matrix is an edge of the simplex indexed by i
-        :return: voi
+        :return: void
         """
         n = self.nbr_splxs
         self.neighbours_matrix = np.zeros((n, n))
@@ -126,7 +127,7 @@ class Rips_complex:
         return ()
 
     @property
-    def persistant_homology(self):
+    def persistent_homology(self):
         """
         function that calculates the persistent homology of the scatter plot
         and adds the dates of birth and death to the k_splx_dates list
@@ -172,3 +173,10 @@ class Rips_complex:
                 if type == 2:
                     self.holes_dates.append((birth, death))
         return ()
+
+    def execute_homology(self):
+        self.construct_network()
+        self.construct_neighbours_matrix()
+        self.persistent_homology()
+        return()
+
