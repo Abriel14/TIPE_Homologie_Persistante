@@ -1,0 +1,8 @@
+import Rips_complex as rc
+
+triangle = [(0,0), (1,0), (0,1)]
+
+triangle_complex = rc.Rips_complex(triangle)
+
+triangle_complex.show_figure()
+triangle_complex.show_pers_diagram()
