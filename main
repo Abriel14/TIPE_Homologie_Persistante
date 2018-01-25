@@ -1,8 +1,22 @@
 import Rips_complex as rc
+import numpy as np
 
-triangle = [(0,0), (1,0), (0,1)]
+theta = np.linspace(0,np.pi,10)
 
-triangle_complex = rc.Rips_complex(triangle)
+cercle = []
 
-triangle_complex.show_figure()
-triangle_complex.show_pers_diagram()
+for t in theta:
+    cercle.append((np.cos(t),np.sin(t)))
+print(cercle)
+
+# triangle = [(0,0), (1,0), (0,1)]
+#
+# triangle_complex = rc.Rips_complex(triangle)
+#
+# triangle_complex.show_figure()
+# triangle_complex.show_pers_diagram()
+
+cercle_complex = rc.Rips_complex(cercle)
+
+cercle_complex.show_figure()
+cercle_complex.show_pers_diagram()

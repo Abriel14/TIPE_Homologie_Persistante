@@ -17,7 +17,7 @@ class Rips_complex:
         self.nbr_1_splxs = len(self.one_splxs)
         self.nbr_2_splxs = len(self.two_splxs)
         self.D = self.max_distance()  # The maximum distance in the scatter plot
-        self.step = self.min_distance() / 10  # the step used in the construction of the simplex
+        self.step = self.min_distance() / 3  # the step used in the construction of the simplex
         self.birth_dates = [0] * len(self.points)  # list of the date of creation of each simplexes
         self.connected_components_dates = []  # list of the dates of 0-simplexes's invariants ruptures
         self.cycles_dates = []  # list of the dates of 1-simplexes's invariants ruptures
@@ -60,7 +60,6 @@ class Rips_complex:
                 dist = self.distance(a, b)
                 if dist_min > dist and a != b:
                     dist_min = dist
-        print(dist_min)
         return dist_min
 
     def construct_network(self):
@@ -181,7 +180,7 @@ class Rips_complex:
                         #         self.cycles_dates.append((birth, death))
                         #     if type == 2:
                         #         self.holes_dates.append((birth, death))
-                        print(self.homology_matrix)
+                        # print(self.homology_matrix)
         # Calculate the date of death of the connected components
         # for 0_simplexes, cycles for 1_splx ans holes for 2-splx
         for j in range(n):
@@ -206,6 +205,9 @@ class Rips_complex:
         return ()
 
     def show_figure(self):
+        figure()
+        plot(self.zero_splxs[:][0], self.zero_splxs[:][1])
+        show()
         print(self.D)
         print(self.splxs)
         print(self.zero_splxs)
@@ -217,14 +219,14 @@ class Rips_complex:
         print(self.connected_components_dates)
         print(self.cycles_dates)
         print(self.holes_dates)
+        # figure()
+        # hlines(range(len(self.connected_components_dates)),self.connected_components_dates[:][0], self.connected_components_dates[:][1] )
+        # title('Connected components')
         figure()
-        plot(self.connected_components_dates)
-        title('Connected components')
-        figure()
-        plot(self.cycles_dates)
+        hlines(range(len(self.cycles_dates)),self.cycles_dates[:][0], self.cycles_dates[:][1])
         title('Cycles')
         figure()
-        plot(self.holes_dates)
+        hlines(range(len(self.holes_dates)), self.holes_dates[:][0],self.holes_dates[:][1])
         title('holes')
         show()
         return ()
