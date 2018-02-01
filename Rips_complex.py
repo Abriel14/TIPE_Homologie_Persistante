@@ -11,17 +11,15 @@ class Rips_complex:
         self.points = points  # list of all points of the simplex
         self.nbr_splxs = len(self.splxs)
         self.zero_splxs = self.points  # list of all 0-simplexes
-        self.one_splxs = []  # list of all 1-simplexes
-        self.two_splxs = []  # list of all 2-simplexes
+        self.one_splxs = []  # list of all 1-simplexes represented by a pair of 0-splx
+        self.two_splxs = []  # list of all 2-simplexes represented by a triplet of 1-splx
         self.nbr_0_splxs = len(self.zero_splxs)
         self.nbr_1_splxs = len(self.one_splxs)
         self.nbr_2_splxs = len(self.two_splxs)
         self.D = self.max_distance()  # The maximum distance in the scatter plot
-        self.step = self.min_distance() / 3  # the step used in the construction of the simplex
-        self.birth_dates = [0] * len(self.points)  # list of the date of creation of each simplexes
+        # self.birth_dates = [0] * len(self.points)  # list of the date of creation of each simplexes
         self.connected_components_dates = []  # list of the dates of 0-simplexes's invariants ruptures
-        self.cycles_dates = []  # list of the dates of 1-simplexes's invariants ruptures
-        self.holes_dates = []  # list of the dates of 2-simplexes's invariants ruptures
+        self.holes_dates = []  # list of the dates of 1-simplexes's invariants ruptures
         self.neighbours_matrix = np.array([])
         self.homology_matrix = np.array([])
         self.pers_diag = self.execute_homology()
@@ -62,6 +60,20 @@ class Rips_complex:
                     dist_min = dist
         return dist_min
 
+    def find_next_edge(self,last_dist):
+        dist_min = self.D
+        edge = self.points[0]
+        for i in range(self.nbr_0_splxs):
+            for j in range(i+1, self.nbr_0_splxs):
+                a = self.points[i]
+                b = self.points[j]
+                dist = self.distance(a, b)
+                if dist_min > dist > last_dist:
+                    dist_min = dist
+                    edge = (i,j)
+        return(dist_min,edge)
+
+
     def construct_network(self):
         """
         construct the Ripps network for each distance r from 0 to dist_max with a given step
@@ -72,44 +84,32 @@ class Rips_complex:
         for k in range(n):
             self.splxs.append((0, (0, k)))
             self.nbr_splxs+=1
-        while r <= (self.D + self.step):
+        while r <= (self.D):
             # Create the 1_splxs
-            for i in range(n):
-                for j in range(i + 1, n):
-                    a = self.zero_splxs[i]
-                    b = self.zero_splxs[j]
-                    if r - self.step <= self.distance(a, b) <= r:
-                        self.one_splxs.append(((i, j),self.nbr_splxs))
-                        self.splxs.append((1, self.nbr_1_splxs))
-                        self.birth_dates.append(r)
-                        self.nbr_1_splxs+=1
-                        self.nbr_splxs+=1
+            r , edge = self.find_next_edge(r)
+            self.one_splxs.append((edge, self.nbr_splxs))
+            self.splxs.append((1, self.nbr_1_splxs))
+            self.nbr_1_splxs += 1
+            self.nbr_splxs += 1
+
             # Create the 2_splxs
-            if self.nbr_1_splxs != 0:
-                for i in range(self.nbr_1_splxs):
-                    a, b = self.one_splxs[i][0]
-                    for j in range(i,self.nbr_1_splxs):
-                        if i != j:
-                            c, d = self.one_splxs[j][0]
-                            if c == a:
-                                for k in range(self.nbr_1_splxs):
-                                    e, f = self.one_splxs[k][0]
-                                    if max((self.distance((a,b),(c,d)),self.distance((a,b),(e,f)),self.distance((c,d),(e,f))))>= r - self.step:
-                                        if b < d:
-                                            if e == b and f == d:
-                                                self.two_splxs.append((i, j, k))
-                                                self.splxs.append((2, self.nbr_2_splxs))
-                                                self.birth_dates.append(r)
-                                                self.nbr_2_splxs +=1
-                                                self.nbr_splxs += 1
-                                        else:
-                                            if e == d and f == b:
-                                                self.two_splxs.append((i, j, k))
-                                                self.splxs.append((2, self.nbr_2_splxs))
-                                                self.birth_dates.append(r)
-                                                self.nbr_2_splxs +=1
-                                                self.nbr_splxs += 1
-            r += self.step
+            a, b = edge
+            for i in range (self.nbr_1_splxs-1):
+                c , d = self.one_splxs[i][0]
+                if c == a:
+                    for j in range(self.nbr_1_splxs-1):
+                        e,f = self.one_splxs[j][0]
+                        if b<d and e==b and f==d:
+                            self.two_splxs.append((self.nbr_1_splxs-1,i,j))
+                            self.splxs.append((2, self.nbr_2_splxs))
+                            self.nbr_2_splxs += 1
+                            self.nbr_splxs += 1
+                        else:
+                            if e==d and  f==b:
+                                self.two_splxs.append((self.nbr_1_splxs - 1, i, j))
+                                self.splxs.append((2, self.nbr_2_splxs))
+                                self.nbr_2_splxs += 1
+                                self.nbr_splxs += 1
         print("Network created")
         return ()
 
@@ -186,14 +186,12 @@ class Rips_complex:
         for j in range(n):
             low_j = low(j, self.homology_matrix)
             if low_j >= 0 and self.homology_matrix[j:, low_j].all() == 0:
-                birth = self.birth_dates[low_j]
-                death = self.birth_dates[j]
+                birth = low_j
+                death = j
                 type, simplex = self.splxs[j]
                 if type == 0:
                     self.connected_components_dates.append((birth, death))
                 if type == 1:
-                    self.cycles_dates.append((birth, death))
-                if type == 2:
                     self.holes_dates.append((birth, death))
         print("persistant homology achieved")
         return ()
@@ -217,13 +215,10 @@ class Rips_complex:
 
     def show_pers_diagram(self):
         print(self.connected_components_dates)
-        print(self.cycles_dates)
         print(self.holes_dates)
         # figure()
         # hlines(range(len(self.connected_components_dates)),self.connected_components_dates[:][0], self.connected_components_dates[:][1] )
         # title('Connected components')
-        figure()
-        hlines(range(len(self.cycles_dates)),self.cycles_dates[:][0], self.cycles_dates[:][1])
         title('Cycles')
         figure()
         hlines(range(len(self.holes_dates)), self.holes_dates[:][0],self.holes_dates[:][1])
