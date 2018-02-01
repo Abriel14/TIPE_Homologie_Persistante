@@ -5,18 +5,18 @@ theta = np.linspace(0,np.pi,10)
 
 cercle = []
 
-for t in theta:
-    cercle.append((np.cos(t),np.sin(t)))
-print(cercle)
-
-# triangle = [(0,0), (1,0), (0,1)]
+# for t in theta:
+#     cercle.append((np.cos(t),np.sin(t)))
+# print(cercle)
 #
-# triangle_complex = rc.Rips_complex(triangle)
+# cercle_complex = rc.Rips_complex(cercle)
 #
-# triangle_complex.show_figure()
-# triangle_complex.show_pers_diagram()
+# cercle_complex.show_figure()
+# cercle_complex.show_pers_diagram()
 
-cercle_complex = rc.Rips_complex(cercle)
+triangle = [(0,0), (1,0), (0,2)]
 
-cercle_complex.show_figure()
-cercle_complex.show_pers_diagram()
+triangle_complex = rc.Rips_complex(triangle)
+
+triangle_complex.show_figure()
+triangle_complex.show_pers_diagram()

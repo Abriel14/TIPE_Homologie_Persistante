@@ -60,19 +60,18 @@ class Rips_complex:
                     dist_min = dist
         return dist_min
 
-    def find_next_edge(self,last_dist):
+    def find_next_edge(self, last_dist):
         dist_min = self.D
-        edge = self.points[0]
+        edge= -1,-1
         for i in range(self.nbr_0_splxs):
-            for j in range(i+1, self.nbr_0_splxs):
+            for j in range(i, self.nbr_0_splxs):
                 a = self.points[i]
                 b = self.points[j]
                 dist = self.distance(a, b)
-                if dist_min > dist > last_dist:
+                if dist_min >= dist > last_dist:
                     dist_min = dist
-                    edge = (i,j)
-        return(dist_min,edge)
-
+                    edge = (i, j)
+        return (dist_min, edge)
 
     def construct_network(self):
         """
@@ -83,33 +82,33 @@ class Rips_complex:
         n = self.nbr_0_splxs
         for k in range(n):
             self.splxs.append((0, (0, k)))
-            self.nbr_splxs+=1
-        while r <= (self.D):
+            self.nbr_splxs += 1
+
+        edge = (0,0)
+        while edge != (-1,-1):
             # Create the 1_splxs
-            r , edge = self.find_next_edge(r)
+            r, edge = self.find_next_edge(r)
+            print(edge)
             self.one_splxs.append((edge, self.nbr_splxs))
             self.splxs.append((1, self.nbr_1_splxs))
             self.nbr_1_splxs += 1
             self.nbr_splxs += 1
-
+            print(self.one_splxs)
             # Create the 2_splxs
             a, b = edge
-            for i in range (self.nbr_1_splxs-1):
-                c , d = self.one_splxs[i][0]
-                if c == a:
-                    for j in range(self.nbr_1_splxs-1):
-                        e,f = self.one_splxs[j][0]
-                        if b<d and e==b and f==d:
-                            self.two_splxs.append((self.nbr_1_splxs-1,i,j))
+            for i in range(self.nbr_1_splxs-1):
+                c, d = self.one_splxs[i][0]
+                if d == a:
+                    print((c,d))
+                    for j in range(i+1,self.nbr_1_splxs-1):
+                        e, f = self.one_splxs[j][0]
+                        print(e,f)
+                        if e == c and f == b:
+                            self.two_splxs.append((self.nbr_1_splxs - 1, i, j))
                             self.splxs.append((2, self.nbr_2_splxs))
                             self.nbr_2_splxs += 1
                             self.nbr_splxs += 1
-                        else:
-                            if e==d and  f==b:
-                                self.two_splxs.append((self.nbr_1_splxs - 1, i, j))
-                                self.splxs.append((2, self.nbr_2_splxs))
-                                self.nbr_2_splxs += 1
-                                self.nbr_splxs += 1
+
         print("Network created")
         return ()
 
@@ -167,7 +166,8 @@ class Rips_complex:
             while test == True:
                 test = False
                 for j0 in range(j):
-                    if low(j0, self.homology_matrix) == low(j, self.homology_matrix) and low(j0, self.homology_matrix) !=-1:
+                    if low(j0, self.homology_matrix) == low(j, self.homology_matrix) and low(j0,
+                                                                                             self.homology_matrix) != -1:
                         self.homology_matrix[:j, j] = (self.homology_matrix[:j, j0] + self.homology_matrix[:j, j]) % 2
                         test = True
                         # if all(self.homology_matrix[:j, j]) == 0:
@@ -189,9 +189,7 @@ class Rips_complex:
                 birth = low_j
                 death = j
                 type, simplex = self.splxs[j]
-                if type == 0:
-                    self.connected_components_dates.append((birth, death))
-                if type == 1:
+                if type == 2:
                     self.holes_dates.append((birth, death))
         print("persistant homology achieved")
         return ()
@@ -221,7 +219,7 @@ class Rips_complex:
         # title('Connected components')
         title('Cycles')
         figure()
-        hlines(range(len(self.holes_dates)), self.holes_dates[:][0],self.holes_dates[:][1])
+        hlines(range(len(self.holes_dates)), self.holes_dates[:][0], self.holes_dates[:][1])
         title('holes')
         show()
         return ()
