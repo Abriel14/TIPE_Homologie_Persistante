@@ -88,7 +88,7 @@ class Rips_complex:
             self.nbr_splxs += 1
 
         r, edge = self.find_next_edge(r)
-        #this while loop finds the new edge to treat and add it to the 1-splx list and then finds out if a 2-splx is created
+        # this while loop finds the new edge to treat and add it to the 1-splx list and then finds out if a 2-splx is created
         while edge != (-1, -1):
             # Add the new edge
             self.one_splxs.append((edge, self.nbr_splxs))
@@ -187,18 +187,31 @@ class Rips_complex:
         # for 0_simplexes, cycles for 1_splx ans holes for 2-splx
         self.connected_components_birth.append(0)
         self.connected_components_death.append(N)
+        temp_holes_birth = N * [0]
+        temp_holes_death = N * [0]
         for j in range(N):
             low_j = low(j, self.homology_matrix)
+            type, simplex = self.splxs[j]
+            if low_j == -1 and type == 1:
+                temp_holes_birth[j] = j
             if low_j >= 0:
-                type, simplex = self.splxs[j]
                 birth = low_j
                 death = j
                 if type == 1:
-                    self.connected_components_birth.append(low_j)
-                    self.connected_components_death.append(j)
+                    self.connected_components_birth.append(birth)
+                    self.connected_components_death.append(death)
                 if self.homology_matrix[j:, low_j].all() == 0 and type == 2:
-                    self.holes_birth.append(birth)
-                    self.holes_death.append(death)
+                    temp_holes_death[low_j] = j
+
+        for k in range(N):
+            if temp_holes_birth[k] != 0 and temp_holes_death == 0:
+                temp_holes_death[k] = N
+
+        for k in range(N):
+            if temp_holes_birth[k] != 0 and temp_holes_death[k] != 0:
+                self.holes_birth.append(temp_holes_birth[k])
+                self.holes_death.append(temp_holes_death[k])
+
         print("persistant homology achieved")
         return ()
 
@@ -221,7 +234,8 @@ class Rips_complex:
 
     def show_pers_diagram(self):
         figure()
-        hlines(range(len(self.connected_components_birth)),self.connected_components_birth, self.connected_components_death )
+        hlines(range(len(self.connected_components_birth)), self.connected_components_birth,
+               self.connected_components_death)
         title('Connected components')
         figure()
         hlines(range(len(self.holes_birth)), self.holes_birth, self.holes_death)
