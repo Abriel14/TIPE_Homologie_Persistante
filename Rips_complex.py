@@ -18,8 +18,11 @@ class Rips_complex:
         self.nbr_2_splxs = len(self.two_splxs)
         self.D = self.max_distance()  # The maximum distance in the scatter plot
         # self.birth_dates = [0] * len(self.points)  # list of the date of creation of each simplexes
-        self.connected_components_dates = []  # list of the dates of 0-simplexes's invariants ruptures
-        self.holes_dates = []  # list of the dates of 1-simplexes's invariants ruptures
+        self.connected_components_birth = []  # list of the birth dates of 0-simplexes's invariants ruptures
+        self.connected_components_death = []  # list of the death dates of 0-simplexes's invariants ruptures
+
+        self.holes_birth = []  # list of the birth dates of 1-simplexes's invariants ruptures
+        self.holes_death = []  # list of the death dates of 1-simpexes invariants ruptures
         self.neighbours_matrix = np.array([])
         self.homology_matrix = np.array([])
         self.pers_diag = self.execute_homology()
@@ -62,7 +65,7 @@ class Rips_complex:
 
     def find_next_edge(self, last_dist):
         dist_min = self.D
-        edge= -1,-1
+        edge = -1, -1
         for i in range(self.nbr_0_splxs):
             for j in range(i, self.nbr_0_splxs):
                 a = self.points[i]
@@ -84,31 +87,28 @@ class Rips_complex:
             self.splxs.append((0, (0, k)))
             self.nbr_splxs += 1
 
-        edge = (0,0)
-        while edge != (-1,-1):
-            # Create the 1_splxs
-            r, edge = self.find_next_edge(r)
-            print(edge)
+        r, edge = self.find_next_edge(r)
+        #this while loop finds the new edge to treat and add it to the 1-splx list and then finds out if a 2-splx is created
+        while edge != (-1, -1):
+            # Add the new edge
             self.one_splxs.append((edge, self.nbr_splxs))
             self.splxs.append((1, self.nbr_1_splxs))
             self.nbr_1_splxs += 1
             self.nbr_splxs += 1
-            print(self.one_splxs)
-            # Create the 2_splxs
             a, b = edge
-            for i in range(self.nbr_1_splxs-1):
+            # find out if a 2-splx has been created
+            for i in range(self.nbr_1_splxs - 1):
                 c, d = self.one_splxs[i][0]
                 if d == a:
-                    print((c,d))
-                    for j in range(i+1,self.nbr_1_splxs-1):
+                    for j in range(i + 1, self.nbr_1_splxs - 1):
                         e, f = self.one_splxs[j][0]
-                        print(e,f)
                         if e == c and f == b:
                             self.two_splxs.append((self.nbr_1_splxs - 1, i, j))
                             self.splxs.append((2, self.nbr_2_splxs))
                             self.nbr_2_splxs += 1
                             self.nbr_splxs += 1
-
+            # find the next edge to treat
+            r, edge = self.find_next_edge(r)
         print("Network created")
         return ()
 
@@ -157,11 +157,12 @@ class Rips_complex:
             return (low_j)
 
         self.homology_matrix = self.neighbours_matrix.copy()
-        n = self.nbr_splxs
+        n = self.nbr_0_splxs
+        N = self.nbr_splxs
 
         # Apply the persistence algorithm
 
-        for j in range(1, n):
+        for j in range(1, N):
             test = True
             while test == True:
                 test = False
@@ -181,16 +182,23 @@ class Rips_complex:
                         #     if type == 2:
                         #         self.holes_dates.append((birth, death))
                         # print(self.homology_matrix)
+
         # Calculate the date of death of the connected components
         # for 0_simplexes, cycles for 1_splx ans holes for 2-splx
-        for j in range(n):
+        self.connected_components_birth.append(0)
+        self.connected_components_death.append(N)
+        for j in range(N):
             low_j = low(j, self.homology_matrix)
-            if low_j >= 0 and self.homology_matrix[j:, low_j].all() == 0:
+            if low_j >= 0:
+                type, simplex = self.splxs[j]
                 birth = low_j
                 death = j
-                type, simplex = self.splxs[j]
-                if type == 2:
-                    self.holes_dates.append((birth, death))
+                if type == 1:
+                    self.connected_components_birth.append(low_j)
+                    self.connected_components_death.append(j)
+                if self.homology_matrix[j:, low_j].all() == 0 and type == 2:
+                    self.holes_birth.append(birth)
+                    self.holes_death.append(death)
         print("persistant homology achieved")
         return ()
 
@@ -212,14 +220,11 @@ class Rips_complex:
         return ()
 
     def show_pers_diagram(self):
-        print(self.connected_components_dates)
-        print(self.holes_dates)
-        # figure()
-        # hlines(range(len(self.connected_components_dates)),self.connected_components_dates[:][0], self.connected_components_dates[:][1] )
-        # title('Connected components')
-        title('Cycles')
         figure()
-        hlines(range(len(self.holes_dates)), self.holes_dates[:][0], self.holes_dates[:][1])
+        hlines(range(len(self.connected_components_birth)),self.connected_components_birth, self.connected_components_death )
+        title('Connected components')
+        figure()
+        hlines(range(len(self.holes_birth)), self.holes_birth, self.holes_death)
         title('holes')
         show()
         return ()
