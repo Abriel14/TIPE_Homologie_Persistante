@@ -17,6 +17,7 @@ class Rips_complex:
         self.nbr_1_splxs = len(self.one_splxs)
         self.nbr_2_splxs = len(self.two_splxs)
         self.D = self.max_distance()  # The maximum distance in the scatter plot
+        self.d = self.mean_dist()
         # self.birth_dates = [0] * len(self.points)  # list of the date of creation of each simplexes
         self.connected_components_birth = []  # list of the birth dates of 0-simplexes's invariants ruptures
         self.connected_components_death = []  # list of the death dates of 0-simplexes's invariants ruptures
@@ -63,6 +64,15 @@ class Rips_complex:
                     dist_min = dist
         return dist_min
 
+    def mean_dist(self):
+        dist_sum = 0
+        for a in self.points:
+            for b in self.points:
+                if a!= b:
+                    dist_sum += self.distance(a,b)
+        return(dist_sum/(len(self.points)*(len(self.points)-1)))
+
+
     def find_next_edge(self, last_dist):
         dist_min = self.D
         edge = -1, -1
@@ -74,6 +84,8 @@ class Rips_complex:
                 if dist_min >= dist > last_dist:
                     dist_min = dist
                     edge = (i, j)
+        if dist_min> 5*self.min_distance():
+            edge = -1,-1
         return (dist_min, edge)
 
     def construct_network(self):
@@ -177,6 +189,8 @@ class Rips_complex:
             if low_j !=0:
                 self.low_j_to_j_list[low_j] = j
             j+=1
+            if j%10 == 0:
+                print(j/N)
         # for j in range(1, N):
         #     test = True
         #     while test:
@@ -226,6 +240,6 @@ class Rips_complex:
         # title('holes')
 
         figure()
-        hlines(range(0, -len(self.pers_pairs_death), -1), self.pers_pairs_birth, self.pers_pairs_death)
+        hlines(range(len(self.pers_pairs_death)), self.pers_pairs_birth, self.pers_pairs_death)
         show()
         return ()
