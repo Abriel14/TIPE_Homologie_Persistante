@@ -20,10 +20,9 @@ class Rips_complex:
         # self.birth_dates = [0] * len(self.points)  # list of the date of creation of each simplexes
         self.connected_components_birth = []  # list of the birth dates of 0-simplexes's invariants ruptures
         self.connected_components_death = []  # list of the death dates of 0-simplexes's invariants ruptures
-        self.pers_pairs_birth = [] #list of the persistent pairs
-        self.pers_pairs_death = []
-        self.holes_birth = []  # list of the birth dates of 1-simplexes's invariants ruptures
-        self.holes_death = []  # list of the death dates of 1-simpexes invariants ruptures
+        self.pers_pairs_birth = []  # list of the biths of persistent pairs
+        self.pers_pairs_death = []  # list of the death of persistent pairs
+        self.low_j_to_j_list = []
         self.neighbours_matrix = np.array([])
         self.homology_matrix = np.array([])
         self.pers_diag = self.execute_homology()
@@ -160,68 +159,42 @@ class Rips_complex:
         self.homology_matrix = self.neighbours_matrix.copy()
         n = self.nbr_0_splxs
         N = self.nbr_splxs
-
+        # initilize the low_j matrix
+        self.low_j_to_j_list = N * [0]
         # Apply the persistence algorithm
+        j = 0
+        while low(j, self.homology_matrix) == 0:
+            j+=1
+        self.low_j_to_j_list[low(j, self.homology_matrix)] = j
+        j+=1
+        while j<N:
+            low_j = low(j,self.homology_matrix)
+            j0 = self.low_j_to_j_list[low_j]
+            while j0 != 0:
+                self.homology_matrix[:j, j] = (self.homology_matrix[:j, j0] + self.homology_matrix[:j, j]) % 2
+                low_j = low(j, self.homology_matrix)
+                j0 = self.low_j_to_j_list[low_j]
+            if low_j !=0:
+                self.low_j_to_j_list[low_j] = j
+            j+=1
+        # for j in range(1, N):
+        #     test = True
+        #     while test:
+        #         test = False
+        #         for j0 in range(j):
+        #             if low(j0, self.homology_matrix) == low(j, self.homology_matrix) \
+        #                     and low(j0, self.homology_matrix) != 0:
+        #                 self.homology_matrix[:j, j] = (self.homology_matrix[:j, j0] + self.homology_matrix[:j, j]) % 2
+        #                 test = True
+        #     if j % 10 == 0:
+        #         print(np.log(j + 1) / np.log(N))
 
-        for j in range(1, N):
-            test = True
-            while test == True:
-                test = False
-                for j0 in range(j):
-                    if low(j0, self.homology_matrix) == low(j, self.homology_matrix) and low(j0,
-                                                                                             self.homology_matrix) != 0:
-                        self.homology_matrix[:j, j] = (self.homology_matrix[:j, j0] + self.homology_matrix[:j, j]) % 2
-                        test = True
-                        # if all(self.homology_matrix[:j, j]) == 0:
-                        #     type, simplex = self.splxs[j]
-                        #     birth = self.birth_dates[j0]
-                        #     death = self.birth_dates[j]
-                        #     if type == 0:
-                        #         self.connected_components_dates.append((birth, death))
-                        #     if type == 1:
-                        #         self.cycles_dates.append((birth, death))
-                        #     if type == 2:
-                        #         self.holes_dates.append((birth, death))
-                        # print(self.homology_matrix)
-
-        # Calculate the date of death of the connected components
-        # for 0_simplexes, cycles for 1_splx ans holes for 2-splx
-        # self.connected_components_birth.append(0)
-        # self.connected_components_death.append(N)
-        # temp_holes_birth = N * [0]
-        # temp_holes_death = N * [0]
-        # for j in range(N):
-        #     low_j = low(j, self.homology_matrix)
-        #     type, simplex = self.splxs[j]
-        #     if low_j == 0 and type == 1:
-        #         temp_holes_birth[j] = j
-        #     if low_j > 0:
-        #         birth = low_j
-        #         death = j
-        #         if type == 1:
-        #             self.connected_components_birth.append(birth)
-        #             self.connected_components_death.append(death)
-        #         if self.homology_matrix[j:, low_j].all() == 0 and type == 2:
-        #             temp_holes_death[low_j] = j
-        #
-        # for k in range(N):
-        #     if temp_holes_birth[k] != 0 and temp_holes_death == 0:
-        #         temp_holes_death[k] = N
-        #
-        # for k in range(N):
-        #     if temp_holes_birth[k] != 0 and temp_holes_death[k] != 0:
-        #         self.holes_birth.append(temp_holes_birth[k])
-        #         self.holes_death.append(temp_holes_death[k])
-        #
         for j in range(N):
             low_j = low(j, self.homology_matrix)
             if low_j != 0:
-                #print(low_j,j)
+                # print(low_j,j)
                 self.pers_pairs_birth.append(low_j)
                 self.pers_pairs_death.append(j)
-
-
-
 
         print("persistant homology achieved")
         return ()
@@ -253,6 +226,6 @@ class Rips_complex:
         # title('holes')
 
         figure()
-        hlines(range (len(self.pers_pairs_death)), self.pers_pairs_birth, self.pers_pairs_death)
+        hlines(range(0, -len(self.pers_pairs_death), -1), self.pers_pairs_birth, self.pers_pairs_death)
         show()
         return ()
