@@ -17,15 +17,15 @@ class Rips_complex:
         self.nbr_1_splxs = len(self.one_splxs)
         self.nbr_2_splxs = len(self.two_splxs)
         self.D = self.max_distance()  # The maximum distance in the scatter plot
-        self.d = self.mean_dist()
+        self.d = self.min_distance()
         # self.birth_dates = [0] * len(self.points)  # list of the date of creation of each simplexes
         self.connected_components_birth = []  # list of the birth dates of 0-simplexes's invariants ruptures
         self.connected_components_death = []  # list of the death dates of 0-simplexes's invariants ruptures
         self.pers_pairs_birth = []  # list of the biths of persistent pairs
         self.pers_pairs_death = []  # list of the death of persistent pairs
         self.low_j_to_j_list = []
-        self.neighbours_matrix = np.array([])
-        self.homology_matrix = np.array([])
+        self.neighbours_matrix = []
+        self.homology_matrix = []
         self.pers_diag = self.execute_homology()
 
     def distance(self, a, b):
@@ -68,10 +68,9 @@ class Rips_complex:
         dist_sum = 0
         for a in self.points:
             for b in self.points:
-                if a!= b:
-                    dist_sum += self.distance(a,b)
-        return(dist_sum/(len(self.points)*(len(self.points)-1)))
-
+                if a != b:
+                    dist_sum += self.distance(a, b)
+        return (dist_sum / (len(self.points) * (len(self.points) - 1)))
 
     def find_next_edge(self, last_dist):
         dist_min = self.D
@@ -84,9 +83,32 @@ class Rips_complex:
                 if dist_min >= dist > last_dist:
                     dist_min = dist
                     edge = (i, j)
-        if dist_min> 5*self.min_distance():
-            edge = -1,-1
+        if dist_min > self.d * 10:
+            edge = -1, -1
         return (dist_min, edge)
+
+    def sum_column(self, i, j, M):
+        column_i = sorted(M[i])
+        column_j = sorted(M[j])
+        if len(column_j) < len(column_i):
+            temp = column_j
+            column_j = column_i
+            column_i = temp
+        sum = []
+        while column_j != []:
+            if column_i != []:
+                a = column_i[-1]
+                b = column_j[-1]
+                if a < b:
+                    sum.append(column_j.pop())
+                if a > b:
+                    sum.append(column_i.pop())
+                if a == b:
+                    column_i.pop()
+                    column_j.pop()
+            else:
+                sum.append(column_j.pop())
+        return (sorted(sum))
 
     def construct_network(self):
         """
@@ -127,26 +149,27 @@ class Rips_complex:
     def construct_neighbours_matrix(self):
         """
         Constructs the neighbours matrix:
-        neighbour_matrix[i,k] is equal to 1 iif the simplex indexed by k in
-        the splxs matrix is an edge of the simplex indexed by i
+        neighbour_matrix[i,k] is equal to 1 iif the simplex indexed by i in
+        the splxs matrix is an edge of the simplex indexed by k
         :return: void
         """
-        n = self.nbr_splxs
-        self.neighbours_matrix = np.zeros((n, n))
-        for k in range(n):
+        N = self.nbr_splxs
+        self.neighbours_matrix = N * [[]]
+        for k in range(N):
             type, simplex_index = self.splxs[k]
             # two possible conditions depending on the type of the simplex :
-            # a 1_splx has 2 got edges whereas a 2_splx has got 3 of them.
+            # a 1_splx has 2 edges whereas a 2_splx has 3.
             if type == 1:
                 i, j = self.one_splxs[simplex_index][0]
-                self.neighbours_matrix[i, k] = 1
-                self.neighbours_matrix[j, k] = 1
+                self.neighbours_matrix[k] = sorted([i, j])
+                # self.neighbours_matrix[k].append(i)
+                # self.neighbours_matrix[k].append(j)
             if type == 2:
                 i, j, l = self.two_splxs[simplex_index]
-                self.neighbours_matrix[self.one_splxs[i][1], k] = 1
-                self.neighbours_matrix[self.one_splxs[j][1], k] = 1
-                self.neighbours_matrix[self.one_splxs[l][1], k] = 1
-
+                self.neighbours_matrix[k] = sorted([self.one_splxs[i][1], self.one_splxs[j][1], self.one_splxs[l][1]])
+                # self.neighbours_matrix[self.one_splxs[i][1], k] = 1
+                # self.neighbours_matrix[self.one_splxs[j][1], k] = 1
+                # self.neighbours_matrix[self.one_splxs[l][1], k] = 1
         print("Neighbours matrix created")
         return ()
 
@@ -162,35 +185,42 @@ class Rips_complex:
             """
             :return: maximum line index of the column j in the matrix R with a 1 in it
             """
-            low_j = 0
-            for k in range(j):
-                if R[k, j] == 1:
-                    low_j = k
-            return (low_j)
+            if R[j] == []:
+                return (0)
+            else:
+                return (sorted(R[j])[-1])
 
-        self.homology_matrix = self.neighbours_matrix.copy()
-        n = self.nbr_0_splxs
+                # low_j = 0
+                # for k in range(j):
+                #     if R[k, j] == 1:
+                #         low_j = k
+                # return (low_j)
+
         N = self.nbr_splxs
+        self.homology_matrix = self.neighbours_matrix[:]
+        n = self.nbr_0_splxs
+
         # initilize the low_j matrix
         self.low_j_to_j_list = N * [0]
         # Apply the persistence algorithm
         j = 0
         while low(j, self.homology_matrix) == 0:
-            j+=1
+            j += 1
         self.low_j_to_j_list[low(j, self.homology_matrix)] = j
-        j+=1
-        while j<N:
-            low_j = low(j,self.homology_matrix)
+        j += 1
+        while j < N:
+            low_j = low(j, self.homology_matrix)
             j0 = self.low_j_to_j_list[low_j]
             while j0 != 0:
-                self.homology_matrix[:j, j] = (self.homology_matrix[:j, j0] + self.homology_matrix[:j, j]) % 2
+                self.homology_matrix[j] = self.sum_column(j, j0, self.homology_matrix)
+                # self.homology_matrix[:j, j] = (self.homology_matrix[:j, j0] + self.homology_matrix[:j, j]) % 2
                 low_j = low(j, self.homology_matrix)
                 j0 = self.low_j_to_j_list[low_j]
-            if low_j !=0:
+            if low_j != 0:
                 self.low_j_to_j_list[low_j] = j
-            j+=1
-            if j%10 == 0:
-                print(j/N)
+            j += 1
+            if j % 10 == 0:
+                print(j / N)
         # for j in range(1, N):
         #     test = True
         #     while test:
