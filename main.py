@@ -2,7 +2,8 @@ import Rips_complex as rc
 import numpy as np
 import numpy.random as rd
 import matplotlib.pyplot as plt
-N = 1000
+N = 10
+
 
 
 theta = 2 * np.pi * rd.random(N)
@@ -12,6 +13,8 @@ r = np.sqrt(rd.random(N))
 disk = []
 x_plot = []
 y_plot = []
+
+
 for k in range(N):
     x = r[k] * np.cos(theta[k])
     y = r[k] * np.sin(theta[k])
@@ -23,8 +26,8 @@ for k in range(N):
 annulus = []
 
 for k in range(N):
-    x = (r[k]*0.2 + 0.5) * np.cos(theta[k])
-    y = (r[k]*0.2 + 0.5) * np.sin(theta[k])
+    x = (r[k]*0.01 + 0.5) * np.cos(theta[k])
+    y = (r[k]*0.01 + 0.5) * np.sin(theta[k])
     annulus.append((x,y))
 
 

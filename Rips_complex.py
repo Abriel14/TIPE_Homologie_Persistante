@@ -18,15 +18,21 @@ class Rips_complex:
         self.nbr_2_splxs = len(self.two_splxs)
         self.D = self.max_distance()  # The maximum distance in the scatter plot
         self.d = self.min_distance()
+        self.dist_appearance = [0]*self.nbr_0_splxs
         # self.birth_dates = [0] * len(self.points)  # list of the date of creation of each simplexes
         self.connected_components_birth = []  # list of the birth dates of 0-simplexes's invariants ruptures
         self.connected_components_death = []  # list of the death dates of 0-simplexes's invariants ruptures
         self.pers_pairs_birth = []  # list of the biths of persistent pairs
         self.pers_pairs_death = []  # list of the death of persistent pairs
+        self.h0_birth = []
+        self.h0_death = []
+        self.h1_birth = []
+        self.h1_death = []
         self.low_j_to_j_list = []
         self.neighbours_matrix = []
         self.homology_matrix = []
         self.pers_diag = self.execute_homology()
+
 
     def distance(self, a, b):
         """        
@@ -83,8 +89,8 @@ class Rips_complex:
                 if dist_min >= dist > last_dist:
                     dist_min = dist
                     edge = (i, j)
-        if dist_min > self.d * 10:
-            edge = -1, -1
+        # if dist_min > self.D / 8.0:
+        #     edge = -1, -1
         return (dist_min, edge)
 
     def sum_column(self, i, j, M):
@@ -120,7 +126,6 @@ class Rips_complex:
         for k in range(n):
             self.splxs.append((0, (0, k)))
             self.nbr_splxs += 1
-
         r, edge = self.find_next_edge(r)
         # this while loop finds the new edge to treat and add it to the 1-splx list and then finds out if a 2-splx is created
         while edge != (-1, -1):
@@ -129,6 +134,7 @@ class Rips_complex:
             self.splxs.append((1, self.nbr_1_splxs))
             self.nbr_1_splxs += 1
             self.nbr_splxs += 1
+            self.dist_appearance.append(r)
             a, b = edge
             # find out if a 2-splx has been created
             for i in range(self.nbr_1_splxs - 1):
@@ -141,6 +147,7 @@ class Rips_complex:
                             self.splxs.append((2, self.nbr_2_splxs))
                             self.nbr_2_splxs += 1
                             self.nbr_splxs += 1
+                            self.dist_appearance.append(r)
             # find the next edge to treat
             r, edge = self.find_next_edge(r)
         print("Network created")
@@ -186,7 +193,7 @@ class Rips_complex:
             :return: maximum line index of the column j in the matrix R with a 1 in it
             """
             if R[j] == []:
-                return (0)
+                return (-1)
             else:
                 return (sorted(R[j])[-1])
 
@@ -199,24 +206,23 @@ class Rips_complex:
         N = self.nbr_splxs
         self.homology_matrix = self.neighbours_matrix[:]
         n = self.nbr_0_splxs
-
         # initilize the low_j matrix
-        self.low_j_to_j_list = N * [0]
+        self.low_j_to_j_list = N * [-1]
         # Apply the persistence algorithm
         j = 0
-        while low(j, self.homology_matrix) == 0:
+        while low(j, self.homology_matrix) == -1:
             j += 1
         self.low_j_to_j_list[low(j, self.homology_matrix)] = j
         j += 1
         while j < N:
             low_j = low(j, self.homology_matrix)
             j0 = self.low_j_to_j_list[low_j]
-            while j0 != 0:
+            while j0 != -1:
                 self.homology_matrix[j] = self.sum_column(j, j0, self.homology_matrix)
                 # self.homology_matrix[:j, j] = (self.homology_matrix[:j, j0] + self.homology_matrix[:j, j]) % 2
                 low_j = low(j, self.homology_matrix)
                 j0 = self.low_j_to_j_list[low_j]
-            if low_j != 0:
+            if low_j != -1:
                 self.low_j_to_j_list[low_j] = j
             j += 1
             if j % 10 == 0:
@@ -235,11 +241,17 @@ class Rips_complex:
 
         for j in range(N):
             low_j = low(j, self.homology_matrix)
-            if low_j != 0:
+            if low_j != -1:
                 # print(low_j,j)
-                self.pers_pairs_birth.append(low_j)
-                self.pers_pairs_death.append(j)
-
+                # self.pers_pairs_birth.append(self.dist_appearance[low_j])
+                # self.pers_pairs_death.append(self.dist_appearance[j])
+                if self.splxs[low_j][0] == 0:
+                    self.h0_birth.append(self.dist_appearance[low_j])
+                    self.h0_death.append(self.dist_appearance[j])
+                    print(low_j)
+                else:
+                    self.h1_birth.append(self.dist_appearance[low_j])
+                    self.h1_death.append(self.dist_appearance[j])
         print("persistant homology achieved")
         return ()
 
@@ -270,6 +282,10 @@ class Rips_complex:
         # title('holes')
 
         figure()
-        hlines(range(len(self.pers_pairs_death)), self.pers_pairs_birth, self.pers_pairs_death)
+        title("H0")
+        hlines(range(len(self.h0_birth)), self.h0_birth, self.h0_death)
+        figure()
+        title("H1")
+        hlines(range(len(self.h1_birth)), self.h1_birth, self.h1_death)
         show()
         return ()
