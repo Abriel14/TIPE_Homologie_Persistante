@@ -2,6 +2,30 @@ import numpy as np
 from matplotlib.pyplot import *
 
 
+class Point:
+    """ Point class represents and manipulates x,y coords. """
+
+    def __init__(self, x, y, numero):
+        """ Create a new point en x,y """
+        self.x = x
+        self.y = y
+        self.numero = numero
+
+    def dist(self, p):
+        """calcule la distance entre un point et un autre"""
+        d = m.sqrt((self.x - p.x) ** 2 + (self.y - p.y) ** 2)
+        return d
+
+def affiche(tabP,scatt = 20):
+    px = [tabP[i].x for i in range(len(tabP))]
+    py = [tabP[i].y for i in range(len(tabP))]
+    scatter(px,px,scatt)
+    xlabel('x')
+    ylabel('y')
+    show()
+
+
+
 class Rips_complex:
     def __init__(self, points):
         """
@@ -34,15 +58,6 @@ class Rips_complex:
         self.pers_diag = self.execute_homology()
 
 
-    def distance(self, a, b):
-        """        
-        :param a: int tuple
-        :param b: int tuple
-        :return: eulerian distance between the two points
-        """
-        xa, ya = a
-        xb, yb = b
-        return (np.sqrt((xa - xb) * (xa - xb) + (ya - yb) * (ya - yb)))
 
     def max_distance(self):
         """
@@ -52,7 +67,7 @@ class Rips_complex:
         dist_max = 0
         for a in self.points:
             for b in self.points:
-                dist = self.distance(a, b)
+                dist = a.dist(b)
                 if dist_max < dist:
                     dist_max = dist
         return dist_max
@@ -65,7 +80,7 @@ class Rips_complex:
         dist_min = self.D
         for a in self.points:
             for b in self.points:
-                dist = self.distance(a, b)
+                dist = a.dist(b)
                 if dist_min > dist and a != b:
                     dist_min = dist
         return dist_min
@@ -75,7 +90,7 @@ class Rips_complex:
         for a in self.points:
             for b in self.points:
                 if a != b:
-                    dist_sum += self.distance(a, b)
+                    dist_sum += a.dist(b)
         return (dist_sum / (len(self.points) * (len(self.points) - 1)))
 
     def find_next_edge(self, last_dist):
@@ -85,7 +100,7 @@ class Rips_complex:
             for j in range(i, self.nbr_0_splxs):
                 a = self.points[i]
                 b = self.points[j]
-                dist = self.distance(a, b)
+                dist = a.dist(b)
                 if dist_min >= dist > last_dist:
                     dist_min = dist
                     edge = (i, j)
