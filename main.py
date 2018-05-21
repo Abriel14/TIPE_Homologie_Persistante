@@ -1,41 +1,44 @@
-import Rips_complex as rc
-import numpy as np
+import homology as h
 import numpy.random as rd
-import matplotlib.pyplot as plt
-N = 10
+import math
+N = 600
+
+points = [h.Point(-1 + 2 * rd.random(), -1 + 2 * rd.random(), i) for i in range(N)]
+anneau = []
+k = 0
+for i in range(4 * N):
+    p = h.Point(-1 + 2 * rd.random(), -1 + 2 * rd.random(), k)
+    d = math.sqrt((p.x) ** 2 + (p.y) ** 2)
+    if d > 0.5 and d < 0.6:
+        anneau.append(p)
+        k += 1
+
+h.affiche(anneau)
 
 
 
-theta = 2 * np.pi * rd.random(N)
-
-r = np.sqrt(rd.random(N))
-
-disk = []
-x_plot = []
-y_plot = []
+cplx,nbL = h.Lazy_Witness_Complex(anneau , 0.1, 1)
+D = h.calcule_D(cplx,nbL)
+DD = h.reduction_D(D)
+C = h.paires_pers(D,cplx,nbL)
+h.diag_pers(C)
 
 
-for k in range(N):
-    x = r[k] * np.cos(theta[k])
-    y = r[k] * np.sin(theta[k])
-    x_plot.append(x)
-    y_plot.append(y)
-    disk.append((x,y))
+doubleanneau=[]
 
+k= 0
+for i in range(2*N) :
+    p = h.Point(-1 + 2*rd.random(),-1 + 2*rd.random(),k)
+    d1 = math.sqrt((p.x-0.5)**2+(p.y-0.5)**2)
+    d2 = math.sqrt((p.x+0.5)**2+(p.y+0.5)**2)
+    if (d1 > 0.4 and d1 < 0.5) or (d2 > 0.4 and d2 < 0.5) :
+        doubleanneau.append(p)
+        k+=1
 
-annulus = []
+h.affiche(doubleanneau)
 
-for k in range(N):
-    x = (r[k]*0.01 + 0.5) * np.cos(theta[k])
-    y = (r[k]*0.01 + 0.5) * np.sin(theta[k])
-    annulus.append((x,y))
-
-
-plt.plot(x_plot,y_plot,'o')
-plt.show()
-
-annulus_complex = rc.Rips_complex(annulus)
-annulus_complex.show_pers_diagram()
-
-disk_complex = rc.Rips_complex(disk)
-disk_complex.show_pers_diagram()
+cplx,nbL = h.Lazy_Witness_Complex(doubleanneau , 0.1, 1)
+D = h.calcule_D(cplx,nbL)
+DD = h.reduction_D(D)
+C = h.paires_pers(D,cplx,nbL)
+h.diag_pers(C)
