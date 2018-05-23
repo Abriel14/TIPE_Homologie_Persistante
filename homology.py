@@ -2,6 +2,8 @@ import numpy as np
 from matplotlib.pyplot import *
 import math as m
 from operator import itemgetter
+import random as rd
+import math
 
 
 class Point:
@@ -115,8 +117,9 @@ def paires_pers(D, cplx, nbrL):
     res = []
     for i in range(len(listlow)):
         if listlow[i] != 0:
-            (splx, time, type) = cplx[i - nbrL]
-            res.append(((listlow[i], i), type))
+            (splx, time_d, type) = cplx[i - nbrL]
+            (splx, time_b, typeb) = cplx[listlow[i] - nbrL]
+            res.append(((time_b, time_d), type))
     return (res)
 
 
@@ -136,11 +139,60 @@ def diag_pers(paires):
     figure()
     subplot(211)
     title("H0")
-    hlines(range(len(h0_birth)), h0_birth, h0_death, colors='r')
+    xlabel('Indice du simplexe')
+    ylabel("Indice de la classe d'homologie")
+    hlines(range(len(h0_birth)), h0_birth, h0_death, colors='b')
     subplot(212)
     title("H1")
-    hlines(range(len(h1_birth)), h1_birth, h1_death, colors='r')
+    xlabel('Indice du simplexe')
+    ylabel("Indice de la classe d'homologie")
+    hlines(range(len(h1_birth)), h1_birth, h1_death, colors='b')
     show()
+
+
+def annulus(N, r1, r2):
+    anneau = []
+    k = 0
+    for i in range(4 * N):
+        p = Point(-1 + 2 * rd.random(), -1 + 2 * rd.random(), k)
+        d = math.sqrt((p.x) ** 2 + (p.y) ** 2)
+        if d > r1 and d < r2:
+            anneau.append(p)
+            k += 1
+    return anneau
+
+
+def limite(Nmin, Nmax, r1, r2,nbr_test):
+    res = []
+    for N in range(Nmax, Nmin, -1):
+        print(N)
+        general_mean = 0
+        for i in range(nbr_test):
+            anneau = annulus(N, r1, r2)
+            cplx, nbL = Lazy_Witness_Complex(anneau, 0.1, 1)
+            D = calcule_D(cplx, nbL)
+            DD = reduction_D(D)
+            C = paires_pers(D, cplx, nbL)
+            k0 = 0
+            highest = 0
+            for k in range(len(C)):
+                (time_b, time_d),type = C[k]
+                length = time_d - time_b
+                if length > highest:
+                    highest = length
+                    k0 = k
+            mean_low = 0
+            for k in range(len(C)):
+                (time_b, time_d), type = C[k]
+                if k!=k0:
+                    mean_low += time_d - time_b
+            mean_low = mean_low / (len(C) - 1)
+            general_mean+=abs(highest/mean_low)
+        general_mean = general_mean / nbr_test
+        res.append(general_mean)
+    plot(range(Nmax, Nmin, -1),res)
+    show()
+
 
 # def calcul_D(lzyCplx, nbr_tem):
 #     D = [[] for k in range(nbr_tem + len(lzyCplx))]
