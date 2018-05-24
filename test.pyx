@@ -16,7 +16,6 @@ def low(np.ndarray[DTYPE_t, ndim=2] mat,DTYPE_t j):
         if mat[i][j] == 1:
             res = i
     return (res)
-
 def reduction_D(np.ndarray[DTYPE_f, ndim=2] mat):
     """procède à la réduction de la matrice D"""
     listlow = [low(mat, j) for j in range(len(mat))]
@@ -33,11 +32,3 @@ def reduction_D(np.ndarray[DTYPE_f, ndim=2] mat):
                 else:
                     j0 = j0 + 1
     return (mat)
-
-
-
-
-
-
-
-

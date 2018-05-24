@@ -1,9 +1,9 @@
 import homology2D as h2D
 import homology3D as h3D
 import numpy as np
-from ninja.test import reduction
+import math
 
-N = 400
+N = 100
 # h.limite(100,250,0.5,0.7,10)
 
 torus = []
@@ -11,26 +11,27 @@ torus = []
 a = 0.7
 b = 0.2
 
-theta = 2 * np.pi * np.random.rand(N)
-phi = 2 * np.pi * np.random.rand(N)
+theta = 2*np.pi*np.random.rand(N)
+phi = 2*np.pi*np.random.rand(N)
 
-x = (a + b * np.cos(phi)) * np.cos(theta)
-y = (a + b * np.cos(phi)) * np.sin(theta)
-z = b * np.sin(phi)
+
+x=(a + b * np.cos(phi))* np.cos(theta)
+y=(a + b * np.cos(phi))* np.sin(theta)
+z=b * np.sin(phi)
 for k in range(len(x)):
-    p = h3D.Point(x[k], y[k], z[k], k)
+    p = h3D.Point(x[k],y[k],z[k],k)
     torus.append(p)
 
 sphere = []
-theta = np.pi * np.random.rand(N)
-phi = 2 * np.pi * np.random.rand(N)
+theta = np.pi*np.random.rand(N)
+phi = 2*np.pi*np.random.rand(N)
 
-x = np.sin(theta) * np.cos(phi)
-y = np.sin(theta) * np.sin(phi)
+x = np.sin(theta)*np.cos(phi)
+y = np.sin(theta)*np.sin(phi)
 z = np.cos(theta)
 
 for k in range(len(x)):
-    p = h3D.Point(x[k], y[k], z[k], k)
+    p = h3D.Point(x[k],y[k],z[k],k)
     sphere.append(p)
 
 # h3D.affiche(sphere)
@@ -44,10 +45,10 @@ for k in range(len(x)):
 
 h3D.affiche(torus)
 
-cplx, nbL = h3D.Lazy_Witness_Complex(torus, 0.05, 1)
-D = h3D.calcule_D(cplx, nbL)
-DD = reduction_D(D)
-C = h3D.paires_pers(D, cplx, nbL)
+cplx,nbL = h3D.Lazy_Witness_Complex(torus , 0.05, 1)
+D = h3D.calcule_D(cplx,nbL)
+DD = h3D.reduction_D(D)
+C = h3D.paires_pers(D,cplx,nbL)
 h3D.diag_pers(C)
 
 
