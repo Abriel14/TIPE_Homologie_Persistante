@@ -1,7 +1,6 @@
 import homology2D as h2D
 import homology3D as h3D
 import numpy as np
-from ninja.test import reduction
 
 N = 400
 # h.limite(100,250,0.5,0.7,10)
@@ -46,7 +45,7 @@ h3D.affiche(torus)
 
 cplx, nbL = h3D.Lazy_Witness_Complex(torus, 0.05, 1)
 D = h3D.calcule_D(cplx, nbL)
-DD = reduction_D(D)
+DD = h3D.reduction_D(D)
 C = h3D.paires_pers(D, cplx, nbL)
 h3D.diag_pers(C)
 
