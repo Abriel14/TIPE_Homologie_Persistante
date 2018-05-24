@@ -9,7 +9,7 @@ ctypedef np.float_t DTYPE_f
 @cython.boundscheck(False)  # turn off bounds-checking for entire function
 @cython.wraparound(False)  # turn off negative index wrapping for entire function
 
-def low(np.ndarray[DTYPE_t, ndim=2] mat,DTYPE_t j):
+def low(np.ndarray[DTYPE_f, ndim=2] mat,DTYPE_t j):
     """calcule low(j), low(j) est le plus grand indice i tel que la i-ème valaur de la colonne j de mat vaut 1 """
     res = -1
     for i in range(len(mat)):
