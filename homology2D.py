@@ -6,7 +6,6 @@ import random as rd
 import math
 
 
-
 class Point:
     """ Point class represents and manipulates x,y coords. """
 
@@ -163,7 +162,7 @@ def annulus(N, r1, r2):
     return anneau
 
 
-def limite(Nmin, Nmax, r1, r2,nbr_test):
+def limite(Nmin, Nmax, r1, r2, nbr_test):
     res = []
     for N in range(Nmax, Nmin, -1):
         print(N)
@@ -177,7 +176,7 @@ def limite(Nmin, Nmax, r1, r2,nbr_test):
             k0 = 0
             highest = 0
             for k in range(len(C)):
-                (time_b, time_d),type = C[k]
+                (time_b, time_d), type = C[k]
                 length = time_d - time_b
                 if length > highest:
                     highest = length
@@ -185,15 +184,14 @@ def limite(Nmin, Nmax, r1, r2,nbr_test):
             mean_low = 0
             for k in range(len(C)):
                 (time_b, time_d), type = C[k]
-                if k!=k0:
+                if k != k0:
                     mean_low += time_d - time_b
             mean_low = mean_low / (len(C) - 1)
-            general_mean+=abs(highest/mean_low)
+            general_mean += abs(highest / mean_low)
         general_mean = general_mean / nbr_test
         res.append(general_mean)
-    plot(range(Nmax, Nmin, -1),res)
+    plot(range(Nmax, Nmin, -1), res)
     show()
-
 
 # def calcul_D(lzyCplx, nbr_tem):
 #     D = [[] for k in range(nbr_tem + len(lzyCplx))]

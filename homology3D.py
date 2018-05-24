@@ -69,7 +69,9 @@ def Lazy_Witness_Complex(tabP, pourcentage, v):
             for k in range(j + 1, nbrL):
                 for l in range(k + 1, nbrL):
                     simplexes.append(
-                        [(i, j, k, l), max(date_apparition[i][j], date_apparition[i][k], date_apparition[i][l],date_apparition[j][k], date_apparition[j][l], date_apparition[k][l]), 2])
+                        [(i, j, k, l),
+                         max(date_apparition[i][j], date_apparition[i][k], date_apparition[i][l], date_apparition[j][k],
+                             date_apparition[j][l], date_apparition[k][l]), 3])
 
     # simplexes est un grand tableau regroupant les informations [simplexe, date, type de simplexe] sur les simplexes créés
     simplexes.sort(key=itemgetter(1))
@@ -81,7 +83,7 @@ def calcule_D(lazycplx, nbrL):
     """calcule la matrice D"""
     D = np.zeros((len(lazycplx) + nbrL, len(lazycplx) + nbrL))
     pos_unsimplexe = np.zeros((nbrL, nbrL))
-    pos_deuxsimplexe = np.zeros((nbrL,nbrL,nbrL))
+    pos_deuxsimplexe = np.zeros((nbrL, nbrL, nbrL))
     for v in range(len(lazycplx)):
         pos = v + nbrL
         (splx, time, type) = lazycplx[v]
@@ -108,13 +110,12 @@ def calcule_D(lazycplx, nbrL):
             D[int(pos_deuxsimplexe[splx[0], splx[1], splx[3]]), pos] = 1
             D[int(pos_deuxsimplexe[splx[0], splx[2], splx[3]]), pos] = 1
             D[int(pos_deuxsimplexe[splx[1], splx[2], splx[3]]), pos] = 1
-        print(D)
     return (D)
 
 
 def low(mat, j):
     """calcule low(j), low(j) est le plus grand indice i tel que la i-ème valaur de la colonne j de mat vaut 1 """
-    res = 0
+    res = -1
     for i in range(len(mat)):
         if mat[i][j] == 1:
             res = i
@@ -126,7 +127,7 @@ def reduction_D(mat):
     listlow = [low(mat, j) for j in range(len(mat))]
     for j in range(len(mat)):
         ilexiste = True
-        while listlow[j] != 0 and ilexiste:
+        while listlow[j] != -1 and ilexiste:
             ilexiste = False
             j0 = 0
             while j0 < j and not (ilexiste):
@@ -143,10 +144,10 @@ def paires_pers(D, cplx, nbrL):
     listlow = [low(D, j) for j in range(len(D))]
     res = []
     for i in range(len(listlow)):
-        if listlow[i] != 0:
+        if listlow[i] != -1:
             (splx, time_d, type) = cplx[i - nbrL]
             (splx, time_b, typeb) = cplx[listlow[i] - nbrL]
-            res.append(((listlow[i], i), type))
+            res.append(((time_b, time_d), type))
     return (res)
 
 
@@ -165,8 +166,7 @@ def diag_pers(paires):
         if type == 2:
             h1_birth.append(b)
             h1_death.append(d)
-        if type ==3:
-            print(b,d)
+        if type == 3:
             h2_birth.append(b)
             h2_death.append(d)
     figure()
@@ -188,48 +188,6 @@ def diag_pers(paires):
     show()
 
 
-def annulus(N, r1, r2):
-    anneau = []
-    k = 0
-    for i in range(4 * N):
-        p = Point(-1 + 2 * rd.random(), -1 + 2 * rd.random(), k)
-        d = math.sqrt((p.x) ** 2 + (p.y) ** 2)
-        if d > r1 and d < r2:
-            anneau.append(p)
-            k += 1
-    return anneau
-
-
-def limite(Nmin, Nmax, r1, r2, nbr_test):
-    res = []
-    for N in range(Nmax, Nmin, -1):
-        print(N)
-        general_mean = 0
-        for i in range(nbr_test):
-            anneau = annulus(N, r1, r2)
-            cplx, nbL = Lazy_Witness_Complex(anneau, 0.1, 1)
-            D = calcule_D(cplx, nbL)
-            DD = reduction_D(D)
-            C = paires_pers(D, cplx, nbL)
-            k0 = 0
-            highest = 0
-            for k in range(len(C)):
-                (time_b, time_d), type = C[k]
-                length = time_d - time_b
-                if length > highest:
-                    highest = length
-                    k0 = k
-            mean_low = 0
-            for k in range(len(C)):
-                (time_b, time_d), type = C[k]
-                if k != k0:
-                    mean_low += time_d - time_b
-            mean_low = mean_low / (len(C) - 1)
-            general_mean += abs(highest / mean_low)
-        general_mean = general_mean / nbr_test
-        res.append(general_mean)
-    plot(range(Nmax, Nmin, -1), res)
-    show()
 
 # def calcul_D(lzyCplx, nbr_tem):
 #     D = [[] for k in range(nbr_tem + len(lzyCplx))]
