@@ -6,6 +6,7 @@ import random as rd
 import math
 
 
+
 class Point:
     """ Point class represents and manipulates x,y coords. """
 
