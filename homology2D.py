@@ -119,7 +119,7 @@ def paires_pers(D, cplx, nbrL):
         if listlow[i] != 0:
             (splx, time_d, type) = cplx[i - nbrL]
             (splx, time_b, typeb) = cplx[listlow[i] - nbrL]
-            res.append(((time_b, time_d), type))
+            res.append(((listlow[i], i), type))
     return (res)
 
 
@@ -139,13 +139,13 @@ def diag_pers(paires):
     figure()
     subplot(211)
     title("H0")
-    xlabel('Indice du simplexe')
-    ylabel("Indice de la classe d'homologie")
+    xlabel('Rayon epsilon')
+    ylabel("Indice de la paire")
     hlines(range(len(h0_birth)), h0_birth, h0_death, colors='b')
     subplot(212)
     title("H1")
-    xlabel('Indice du simplexe')
-    ylabel("Indice de la classe d'homologie")
+    xlabel('Rayon epsilon')
+    ylabel("Indice de la paire")
     hlines(range(len(h1_birth)), h1_birth, h1_death, colors='b')
     show()
 
