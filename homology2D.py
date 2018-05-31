@@ -21,13 +21,14 @@ class Point:
         return d
 
 
-def affiche(tabP, scatt=20):
+def affiche(tabP, name, scatt=20):
     """affiche un nuage de point"""
     px = [tabP[i].x for i in range(len(tabP))]
     py = [tabP[i].y for i in range(len(tabP))]
     scatter(px, py, scatt)
     xlabel('x')
     ylabel('y')
+    savefig(name, format='pdf', transparent=True)
     show()
 
 
@@ -123,7 +124,7 @@ def paires_pers(D, cplx, nbrL):
     return (res)
 
 
-def diag_pers(paires):
+def diag_pers(paires, name):
     h0_birth = []
     h0_death = []
     h1_birth = []
@@ -136,7 +137,7 @@ def diag_pers(paires):
         if type == 2:
             h1_birth.append(b)
             h1_death.append(d)
-    figure()
+    figure(figsize=(10, 10), dpi=90)
     subplot(211)
     title("H0")
     xlabel('Rayon epsilon')
@@ -147,6 +148,7 @@ def diag_pers(paires):
     xlabel('Rayon epsilon')
     ylabel("Indice de la paire")
     hlines(range(len(h1_birth)), h1_birth, h1_death, colors='b')
+    savefig(name, format='pdf', transparent=True)
     show()
 
 
@@ -192,77 +194,3 @@ def limite(Nmin, Nmax, r1, r2, nbr_test):
         res.append(general_mean)
     plot(range(Nmax, Nmin, -1), res)
     show()
-
-# def calcul_D(lzyCplx, nbr_tem):
-#     D = [[] for k in range(nbr_tem + len(lzyCplx))]
-#     un_splx_pos = np.zeros((nbr_tem, nbr_tem))
-#     for k in range(len(lzyCplx)):
-#         position = nbr_tem + k
-#         data, time, type = lzyCplx[k]
-#         if type == 1:
-#             un_splx_pos[data[0], data[1]] = position
-#             un_splx_pos[data[1], data[0]] = position
-#             D[position] = sorted([data[0], data[1]])
-#         if type == 2:
-#             D[position] = sorted(
-#                 [un_splx_pos[data[0], data[1]], un_splx_pos[data[0], data[2]], un_splx_pos[data[1], data[2]]])
-#     return (D)
-#
-#
-# def low_j(M, j):
-#     if M[j] != []:
-#         return (sorted(M[j])[-1])
-#     else:
-#         return (0)
-#
-#
-# def sum_mod_2(M, i, j):
-#     column_i = sorted(M[i])
-#     column_j = sorted(M[j])
-# #    print(column_i,column_j)
-#     if len(column_j) < len(column_i):
-#         temp = column_j
-#         column_j = column_i
-#         column_i = temp
-#     sum = []
-#     while column_j != []:
-#         if column_i != []:
-#             a = column_i[-1]
-#             b = column_j[-1]
-#             if a < b:
-#                 sum.append(column_j.pop())
-#             if a > b:
-#                 sum.append(column_i.pop())
-#             if a == b:
-#                 column_i.pop()
-#                 column_j.pop()
-#         else:
-#             sum.append(column_j.pop())
-# #    print(sorted(sum))
-#     return (sorted(sum))
-#
-#
-# def reduction_D(D):
-#     R = list(D)
-#     list_low = [low_j(R, j) for j in range(len(R))]
-#     for j in range(len(R)):
-#         ilexiste = True
-#         j0 = 0
-#         while not (ilexiste) and j0 < j:
-#             ilexiste = False
-#             if list_low[j] == list_low[j0]:
-#                 R[j] = sum_mod_2(R, j, j0)
-#                 ilexiste = True
-#             else:
-#                 j0 += 1
-#     return (R)
-#
-#
-# def paires_persistence(R, lzyCplx, nbr_tem):
-#     list_low = [low_j(R, j) for j in range(len(R))]
-#     paires = []
-#     for i in range(len(list_low)):
-#         if list_low[i] != 0:
-#             data, time, type = lzyCplx[i - nbr_tem]
-#             paires.append([(list_low[i], i), type])
-#     return (paires)
