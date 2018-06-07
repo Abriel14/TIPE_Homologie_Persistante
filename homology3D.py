@@ -170,7 +170,7 @@ def diag_pers(paires,name):
         if type == 3:
             h2_birth.append(b)
             h2_death.append(d)
-    figure()
+    figure(figsize=(10, 10), dpi=90)
     subplot(311)
     title("H0")
     xlabel('Rayon epsilon')
