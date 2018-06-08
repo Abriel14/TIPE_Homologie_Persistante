@@ -5,8 +5,6 @@ import numpy as np
 
 N = 300
 
-# h.limite(100,250,0.5,0.7,10)
-
 
 sphere = []
 theta = 2 * np.pi * np.random.rand(N)
