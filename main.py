@@ -1,12 +1,9 @@
 import homology2D as h2D
 import homology3D as h3D
 import numpy as np
-import math
-import random as rd
 
-# from test import reduction_D
 
-N = 500
+N = 300
 
 # h.limite(100,250,0.5,0.7,10)
 
@@ -25,7 +22,7 @@ for k in range(len(x)):
 
 torus = []
 
-a = 0.8 
+a = 1
 b = 0.3
 
 x = []
@@ -52,20 +49,11 @@ for k in range(len(x)):
 
 # h3D.affiche(sphere, 'sphere.pdf')
 #
-# cplx, nbL = h3D.Lazy_Witness_Complex(sphere, 0.05, 1)
-# D = h3D.calcule_D(cplx, nbL)
-# DD = h3D.reduction_D(D)
-# C = h3D.paires_pers(D, cplx, nbL)
-# h3D.diag_pers(C, 'sphere_diag.pdf')
-#
+# h3D.hom_pers(sphere, 0.10,'sphere_diag.pdf')
+
 h3D.affiche(torus, 'torus.pdf')
 
-cplx, nbL = h3D.Lazy_Witness_Complex(torus, 0.05, 4)
-D = h3D.calcule_D(cplx, nbL)
-DD = h3D.reduction_D(D)
-C = h3D.paires_pers(D, cplx, nbL)
-h3D.diag_pers(C, 'torus_diag.pdf')
-
+h3D.hom_pers(torus, 0.1,'torus_diag.pdf',3)
 
 
 # disque = []
@@ -78,24 +66,16 @@ h3D.diag_pers(C, 'torus_diag.pdf')
 #         k += 1
 # h2D.affiche(disque, 'disk.pdf')
 #
-# cplx, nbL = h2D.Lazy_Witness_Complex(disque, 0.1, 1)
-# D = h2D.calcule_D(cplx, nbL)
-# DD = h2D.reduction_D(D)
-# C = h2D.paires_pers(D, cplx, nbL)
-# h2D.diag_pers(C, 'disk_diag.pdf')
+#
+# h2D.hom_pers(disque, 0.1,'disk_diag.pdf')
+#
 #
 # anneau = h2D.annulus(N, 0.5, 0.6)
-#
 # h2D.affiche(anneau, 'anneau.pdf')
+# h2D.hom_pers(anneau, 0.1,'anneau_diag.pdf')
 #
-# cplx, nbL = h2D.Lazy_Witness_Complex(anneau, 0.1, 1)
-# D = h2D.calcule_D(cplx, nbL)
-# DD = h2D.reduction_D(D)
-# C = h2D.paires_pers(D, cplx, nbL)
-# h2D.diag_pers(C, 'anneau_diag.pdf')
 #
 # doubleanneau = []
-#
 # k = 0
 # for i in range(2 * N):
 #     p = h2D.Point(-1 + 2 * rd.random(), -1 + 2 * rd.random(), k)
@@ -107,8 +87,4 @@ h3D.diag_pers(C, 'torus_diag.pdf')
 #
 # h2D.affiche(doubleanneau, 'double_anneau.pdf')
 #
-# cplx, nbL = h2D.Lazy_Witness_Complex(doubleanneau, 0.1, 1)
-# D = h2D.calcule_D(cplx, nbL)
-# DD = h2D.reduction_D(D)
-# C = h2D.paires_pers(D, cplx, nbL)
-# h2D.diag_pers(C, 'double_anneau_diag.pdf')
+# h2D.hom_pers(doubleanneau, 0.1,'double_anneau_diag.pdf')

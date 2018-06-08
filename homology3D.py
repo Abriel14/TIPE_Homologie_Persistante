@@ -23,16 +23,16 @@ class Point:
         return d
 
 
-def affiche(tabP,name , scatt=20):
+def affiche(tabP, name, scatt=20):
     """affiche un nuage de point"""
     px = [tabP[i].x for i in range(len(tabP))]
     py = [tabP[i].y for i in range(len(tabP))]
     pz = [tabP[i].z for i in range(len(tabP))]
-    fig = figure(figsize = (10,9))
+    fig = figure(figsize=(10, 9))
     ax = fig.add_subplot(111, projection='3d')
-    ax.set_xlim(-1, 1)
-    ax.set_ylim(-1, 1)
-    ax.set_zlim(-1, 1)
+    ax.set_xlim(-2, 2)
+    ax.set_ylim(-2, 2)
+    ax.set_zlim(-2, 2)
     ax.scatter(px, py, pz)
     savefig(name, format='pdf', transparent=True)
     show()
@@ -77,6 +77,7 @@ def Lazy_Witness_Complex(tabP, pourcentage, v):
     # simplexes est un grand tableau regroupant les informations [simplexe, date, type de simplexe] sur les simplexes créés
     simplexes.sort(key=itemgetter(1))
     # on le trie par date d'apparition des simplexes croissante
+    print("Witness complex créé")
     return (simplexes, nbrL)
 
 
@@ -85,6 +86,7 @@ def calcule_D(lazycplx, nbrL):
     D = np.zeros((len(lazycplx) + nbrL, len(lazycplx) + nbrL))
     pos_unsimplexe = np.zeros((nbrL, nbrL))
     pos_deuxsimplexe = np.zeros((nbrL, nbrL, nbrL))
+    list_low = np.zeros(len(lazycplx) + nbrL)
     for v in range(len(lazycplx)):
         pos = v + nbrL
         (splx, time, type) = lazycplx[v]
@@ -94,6 +96,7 @@ def calcule_D(lazycplx, nbrL):
             pos_unsimplexe[splx[1], splx[0]] = pos
             D[splx[0], pos] = 1
             D[splx[1], pos] = 1
+            list_low[pos] = max(splx[0], splx[1])
         elif type == 2:
             # c'est un 2 simplexe
             pos_deuxsimplexe[splx[0], splx[1], splx[2]] = pos
@@ -105,13 +108,20 @@ def calcule_D(lazycplx, nbrL):
             D[int(pos_unsimplexe[splx[0], splx[1]]), pos] = 1
             D[int(pos_unsimplexe[splx[1], splx[2]]), pos] = 1
             D[int(pos_unsimplexe[splx[0], splx[2]]), pos] = 1
+            list_low[pos] = max(int(pos_unsimplexe[splx[0], splx[1]]), int(pos_unsimplexe[splx[1], splx[2]]),
+                                int(pos_unsimplexe[splx[0], splx[2]]))
         else:
             # c'est un 3 simplexe
             D[int(pos_deuxsimplexe[splx[0], splx[1], splx[2]]), pos] = 1
             D[int(pos_deuxsimplexe[splx[0], splx[1], splx[3]]), pos] = 1
             D[int(pos_deuxsimplexe[splx[0], splx[2], splx[3]]), pos] = 1
             D[int(pos_deuxsimplexe[splx[1], splx[2], splx[3]]), pos] = 1
-    return (D)
+            list_low[pos] = max(int(pos_deuxsimplexe[splx[0], splx[1], splx[2]]),
+                                int(pos_deuxsimplexe[splx[0], splx[1], splx[3]]),
+                                int(pos_deuxsimplexe[splx[0], splx[2], splx[3]]),
+                                int(pos_deuxsimplexe[splx[1], splx[2], splx[3]]))
+    print("Matrice de l'application bord initialisée")
+    return (D,list_low)
 
 
 def low(mat, j):
@@ -123,10 +133,11 @@ def low(mat, j):
     return (res)
 
 
-def reduction_D(mat):
+def reduction_D(mat,listlow):
     """procède à la réduction de la matrice D"""
-    listlow = [low(mat, j) for j in range(len(mat))]
+    # listlow = [low(mat, j) for j in range(len(mat))]
     for j in range(len(mat)):
+        print(j / len(mat))
         ilexiste = True
         while listlow[j] != 0 and ilexiste:
             ilexiste = False
@@ -138,6 +149,7 @@ def reduction_D(mat):
                     listlow[j] = low(mat, j)
                 else:
                     j0 = j0 + 1
+    print("Matrice de l'application bord réduite")
     return (mat)
 
 
@@ -148,11 +160,11 @@ def paires_pers(D, cplx, nbrL):
         if listlow[i] != 0:
             (splx, time_d, type) = cplx[i - nbrL]
             (splx, time_b, typeb) = cplx[listlow[i] - nbrL]
-            res.append(((listlow[i], i), type))
+            res.append(((time_b, time_d), type))
     return (res)
 
 
-def diag_pers(paires,name):
+def diag_pers(paires, name):
     h0_birth = []
     h0_death = []
     h1_birth = []
@@ -170,7 +182,7 @@ def diag_pers(paires,name):
         if type == 3:
             h2_birth.append(b)
             h2_death.append(d)
-    figure(figsize=(10, 10), dpi=90)
+    figure(figsize=(10, 15), dpi=90)
     subplot(311)
     title("H0")
     xlabel('Rayon epsilon')
@@ -188,3 +200,10 @@ def diag_pers(paires,name):
     hlines(range(len(h2_birth)), h2_birth, h2_death, colors='b')
     savefig(name, format='pdf', transparent=True)
     show()
+
+def hom_pers(P,witness_pourc,file_name, v = 1):
+    cplx, nbL = Lazy_Witness_Complex(P, witness_pourc, v)
+    D, list_low = calcule_D(cplx, nbL)
+    DD = reduction_D(D, list_low)
+    C = paires_pers(D, cplx, nbL)
+    diag_pers(C, file_name)

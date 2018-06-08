@@ -62,6 +62,7 @@ def Lazy_Witness_Complex(tabP, pourcentage, v):
     # simplexes est un grand tableau regroupant les informations [simplexe, date, type de simplexe] sur les simplexes créés
     simplexes.sort(key=itemgetter(1))
     # on le trie par date d'apparition des simplexes croissante
+    print("Witness complex créé")
     return (simplexes, nbrL)
 
 
@@ -69,6 +70,7 @@ def calcule_D(lazycplx, nbrL):
     """calcule la matrice D"""
     D = np.zeros((len(lazycplx) + nbrL, len(lazycplx) + nbrL))
     pos_unsimplexe = np.zeros((nbrL, nbrL))
+    list_low = np.zeros(len(lazycplx) + nbrL)
     for v in range(len(lazycplx)):
         pos = v + nbrL
         (splx, time, typpe) = lazycplx[v]
@@ -78,12 +80,17 @@ def calcule_D(lazycplx, nbrL):
             pos_unsimplexe[splx[1], splx[0]] = pos
             D[splx[0], pos] = 1
             D[splx[1], pos] = 1
+            list_low[pos] = max(splx[0], splx[1])
+
         else:
             # c'est un 2 simplexe
             D[int(pos_unsimplexe[splx[0], splx[1]]), pos] = 1
             D[int(pos_unsimplexe[splx[1], splx[2]]), pos] = 1
             D[int(pos_unsimplexe[splx[0], splx[2]]), pos] = 1
-    return (D)
+            list_low[pos] = max(int(pos_unsimplexe[splx[0], splx[1]]), int(pos_unsimplexe[splx[1], splx[2]]),
+                                int(pos_unsimplexe[splx[0], splx[2]]))
+    print("Matrice de l'application bord initialisée")
+    return (D, list_low)
 
 
 def low(mat, j):
@@ -95,9 +102,8 @@ def low(mat, j):
     return (res)
 
 
-def reduction_D(mat):
+def reduction_D(mat,listlow):
     """procède à la réduction de la matrice D"""
-    listlow = [low(mat, j) for j in range(len(mat))]
     for j in range(len(mat)):
         ilexiste = True
         while listlow[j] != 0 and ilexiste:
@@ -110,6 +116,7 @@ def reduction_D(mat):
                     listlow[j] = low(mat, j)
                 else:
                     j0 = j0 + 1
+    print("Matrice de l'application bord réduite")
     return (mat)
 
 
@@ -150,6 +157,13 @@ def diag_pers(paires, name):
     hlines(range(len(h1_birth)), h1_birth, h1_death, colors='b')
     savefig(name, format='pdf', transparent=True)
     show()
+
+def hom_pers(P,witness_pourc,file_name, v = 1):
+    cplx, nbL = Lazy_Witness_Complex(P, witness_pourc, v)
+    D, list_low = calcule_D(cplx, nbL)
+    DD = reduction_D(D, list_low)
+    C = paires_pers(D, cplx, nbL)
+    diag_pers(C, file_name)
 
 
 def annulus(N, r1, r2):
