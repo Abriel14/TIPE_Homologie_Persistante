@@ -127,7 +127,7 @@ def paires_pers(D, cplx, nbrL):
         if listlow[i] != 0:
             (splx, time_d, type) = cplx[i - nbrL]
             (splx, time_b, typeb) = cplx[listlow[i] - nbrL]
-            res.append(((listlow[i], i), type))
+            res.append((sorted([listlow[i], i]), type))
     return (res)
 
 
@@ -137,7 +137,7 @@ def diag_pers(paires, name):
     h1_birth = []
     h1_death = []
     for p in paires:
-        [(b, d), type] = p
+        [[b, d], type] = p
         if type == 1:
             h0_birth.append(b)
             h0_death.append(d)
@@ -169,7 +169,7 @@ def hom_pers(P,witness_pourc,file_name, v = 1):
 def annulus(N, r1, r2):
     anneau = []
     k = 0
-    for i in range(4 * N):
+    while k< N:
         p = Point(-1 + 2 * rd.random(), -1 + 2 * rd.random(), k)
         d = math.sqrt((p.x) ** 2 + (p.y) ** 2)
         if d > r1 and d < r2:
