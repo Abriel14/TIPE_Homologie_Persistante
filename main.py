@@ -1,5 +1,5 @@
 import homology2D as h2D
-import homology3D_test as h3D
+import homology3D as h3D
 import numpy as np
 import random as rd
 from math import *
@@ -50,37 +50,37 @@ for k in range(len(x)):
 #
 # h3D.hom_pers(sphere, 0.10,'sphere_diag.pdf')
 
-h3D.affiche(torus, 'torus.pdf')
+# h3D.affiche(torus, 'torus.pdf')
+#
+# h3D.hom_pers(torus, 0.05,'torus_diag.pdf',2)
 
-h3D.hom_pers(torus, 0.05,'torus_diag.pdf',2)
+
+disque = []
+k = 0
+while k<N:
+    p = h2D.Point(-1 + 2 * rd.random(), -1 + 2 * rd.random(), k)
+    d = sqrt((p.x) ** 2 + (p.y) ** 2)
+    if (d < 0.8):
+        disque.append(p)
+        k += 1
+h2D.affiche(disque, 'disk.pdf')
+h2D.hom_pers(disque, 0.1,'disk_diag.pdf')
 
 
-# disque = []
-# k = 0
-# while k<N:
-#     p = h2D.Point(-1 + 2 * rd.random(), -1 + 2 * rd.random(), k)
-#     d = sqrt((p.x) ** 2 + (p.y) ** 2)
-#     if (d < 0.8):
-#         disque.append(p)
-#         k += 1
-# h2D.affiche(disque, 'disk.pdf')
-# h2D.hom_pers(disque, 0.1,'disk_diag.pdf')
-#
-#
-# anneau = h2D.annulus(N, 0.4, 0.6)
-# h2D.affiche(anneau, 'anneau.pdf')
-# h2D.hom_pers(anneau, 0.1,'anneau_diag.pdf')
-#
-#
-# doubleanneau = []
-# k = 0
-# while k<N:
-#     p = h2D.Point(-1 + 2 * rd.random(), -1 + 2 * rd.random(), k)
-#     d1 = sqrt((p.x + 0.5) ** 2 + (p.y + 0.5) ** 2)
-#     d2 = sqrt((p.x - 0.5) ** 2 + (p.y - 0.5) ** 2)
-#     if (d1 > 0.4 and d1 < 0.5) or (d2 > 0.4 and d2 < 0.5):
-#         doubleanneau.append(p)
-#         k += 1
-#
-# h2D.affiche(doubleanneau, 'double_anneau.pdf')
-# h2D.hom_pers(doubleanneau, 0.1,'double_anneau_diag.pdf')
+anneau = h2D.annulus(N, 0.4, 0.6)
+h2D.affiche(anneau, 'anneau.pdf')
+h2D.hom_pers(anneau, 0.1,'anneau_diag.pdf')
+
+
+doubleanneau = []
+k = 0
+while k<N:
+    p = h2D.Point(-1 + 2 * rd.random(), -1 + 2 * rd.random(), k)
+    d1 = sqrt((p.x + 0.5) ** 2 + (p.y + 0.5) ** 2)
+    d2 = sqrt((p.x - 0.5) ** 2 + (p.y - 0.5) ** 2)
+    if (d1 > 0.4 and d1 < 0.5) or (d2 > 0.4 and d2 < 0.5):
+        doubleanneau.append(p)
+        k += 1
+
+h2D.affiche(doubleanneau, 'double_anneau.pdf')
+h2D.hom_pers(doubleanneau, 0.1,'double_anneau_diag.pdf')
