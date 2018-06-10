@@ -1,10 +1,10 @@
 import homology2D as h2D
-import homology3D as h3D
+import homology3D_test as h3D
 import numpy as np
 import random as rd
 from math import *
 
-N =400
+N =500
 
 
 sphere = []
@@ -22,7 +22,7 @@ for k in range(len(x)):
 torus = []
 
 a = 1
-b = 0.3
+b = 0.5
 
 x = []
 y = []

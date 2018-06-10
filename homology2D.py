@@ -34,7 +34,7 @@ def affiche(tabP, name, scatt=20):
 
 def mini_maxi(tabP, delta, i, j, nbrL):
     """calcule le minimum des max(d(a1,w),d(a2,w)) - delta[w] pour tous les point w n'appartenants pas à la filtration"""
-    res = [max(tabP[w].dist(tabP[i]), tabP[w].dist(tabP[j])) - delta[w - nbrL] for w in range(nbrL, len(tabP))]
+    res = [abs(max(tabP[w].dist(tabP[i]), tabP[w].dist(tabP[j])) - delta[w - nbrL]) for w in range(nbrL, len(tabP))]
     return (min(res))
 
 
