@@ -28,7 +28,7 @@ def affiche(tabP, name, scatt=20):
     px = [tabP[i].x for i in range(len(tabP))]
     py = [tabP[i].y for i in range(len(tabP))]
     pz = [tabP[i].z for i in range(len(tabP))]
-    fig = figure(figsize=(10, 9))
+    fig = figure(figsize=(7, 6.5))
     ax = fig.add_subplot(111, projection='3d')
     ax.set_xlim(-2, 2)
     ax.set_ylim(-2, 2)
@@ -175,7 +175,7 @@ def paires_pers(D, cplx, nbrL):
         if listlow[i] != 0:
             (splx, time_d, type) = cplx[i - nbrL]
             (splx, time_b, typeb) = cplx[listlow[i] - nbrL]
-            res.append(((time_b, time_d), type))
+            res.append(((listlow[i], i), type))
     return (res)
 
 

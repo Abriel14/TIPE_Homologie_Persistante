@@ -134,7 +134,7 @@ def paires_pers(D, cplx, nbrL):
         if listlow[i] != 0:
             (splx, time_d, type) = cplx[i - nbrL]
             (splx, time_b, typeb) = cplx[listlow[i] - nbrL]
-            res.append((sorted([listlow[i], i]), type))
+            res.append(((time_b, time_d), type))
     return (res)
 
 
